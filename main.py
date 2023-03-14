@@ -96,6 +96,7 @@ def game_loop():
         keys = pygame.key.get_pressed()
         collision_index = player_rect.collidelist(tile_rect_list)
         if collision_index == -1:
+            player_color = blue
             if keys[pygame.K_w]:
                 player_y -= player_speed
             if keys[pygame.K_s]:
@@ -105,14 +106,15 @@ def game_loop():
             if keys[pygame.K_d]:
                 player_x += player_speed
         else:
+            player_color = green
             if abs(player_rect.top - tile_rect_list[collision_index].bottom) < collision_tolerance:
-                player_y += 7
+                player_y += collision_tolerance + 7
             if abs(player_rect.bottom - tile_rect_list[collision_index].top) < collision_tolerance:
-                player_y -= 7
+                player_y -= collision_tolerance + 7
             if abs(player_rect.right - tile_rect_list[collision_index].left) < collision_tolerance:
-                player_x -= 7
+                player_x -= collision_tolerance + 7
             if abs(player_rect.left - tile_rect_list[collision_index].right) < collision_tolerance:
-                player_x += 7
+                player_x += collision_tolerance + 7
         player_rect = pygame.draw.rect(displaysurf, player_color, pygame.Rect(player_x, player_y, tile_size, tile_size))
         update_display()
         clock.tick(60)
