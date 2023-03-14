@@ -21,7 +21,7 @@ blue = (0, 0, 255)
 
 
 #collision
-collision_tolerance = 15
+collision_tolerance = 10
 #tiles and map
 tile_size = 64
 ground_tile = pygame.image.load("TOP-DOWN-TAG\\graphics\\ground_tile.png")
@@ -86,14 +86,16 @@ def game_loop():
     player_speed = 6
     player_x = 500
     player_y = 500
-    player_rect = pygame.draw.rect(displaysurf, player_color, pygame.Rect(player_x, player_y, tile_size*1.8, tile_size*1.8))
+    player_rect = pygame.draw.rect(displaysurf, player_color, pygame.Rect(player_x, player_y, tile_size, tile_size))
     while game_state == 'tag':
         displaysurf.fill(black)
+        tiles(map1)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit()
         keys = pygame.key.get_pressed()
-        if player_rect.collidelist(tile_rect_list) == -1:
+        collision_index = player_rect.collidelist(tile_rect_list)
+        if collision_index == -1:
             if keys[pygame.K_w]:
                 player_y -= player_speed
             if keys[pygame.K_s]:
@@ -102,10 +104,7 @@ def game_loop():
                 player_x -= player_speed
             if keys[pygame.K_d]:
                 player_x += player_speed
-        tiles(map1)
-        #for tile_rect in tile_rect_list:
-        collision_index = player_rect.collidelist(tile_rect_list)
-        if player_rect.collidelist(tile_rect_list) > -1:
+        else:
             if abs(player_rect.top - tile_rect_list[collision_index].bottom) < collision_tolerance:
                 player_y += 7
             if abs(player_rect.bottom - tile_rect_list[collision_index].top) < collision_tolerance:
