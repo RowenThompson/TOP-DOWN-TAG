@@ -5,7 +5,7 @@ resolution = displaysurf_width, displaysurf_height = (1920, 1080)
 displaysurf = pygame.display.set_mode(resolution)
 game_name = "Top Down Tag"
 game_display_name = pygame.display.set_caption(game_name)
-game_icon = pygame.image.load("graphics\\wall_tile.png")
+game_icon = pygame.image.load("TOP-DOWN-TAG\\graphics\\wall_tile.png")
 game_display_icon = pygame.display.set_icon(game_icon)
 clock = pygame.time.Clock()
 
@@ -25,13 +25,13 @@ collision_tolerance = 10
 
 #tiles and map
 tile_size = 64
-ground_tile = pygame.image.load("graphics\\ground_tile.png")
+ground_tile = pygame.image.load("TOP-DOWN-TAG\\graphics\\ground_tile.png")
 ground_tile = pygame.transform.scale(ground_tile, (tile_size, tile_size))
 
-wall_tile = pygame.image.load("graphics\\wall_tile.png")
+wall_tile = pygame.image.load("TOP-DOWN-TAG\\graphics\\wall_tile.png")
 wall_tile = pygame.transform.scale(wall_tile, (tile_size, tile_size))
 
-enemy_png = pygame.image.load("graphics\\enemy.png")
+enemy_png = pygame.image.load("TOP-DOWN-TAG\\graphics\\enemy.png")
 enemy_png = pygame.transform.scale(enemy_png, (tile_size, tile_size))
 
 tile_rect_list = []
@@ -67,7 +67,6 @@ def tiles(map1):
         for x, c in enumerate(line):
             if c == "g":
                 ground_rect = displaysurf.blit(ground_tile, (x * tile_size, y * tile_size))
-                tile_rect_list.append(ground_rect)
             if c == "w":
                 wall_rect = displaysurf.blit(wall_tile, (x * tile_size, y * tile_size))
                 tile_rect_list.append(wall_rect)
@@ -103,18 +102,17 @@ def game_loop():
             player_x -= player_speed
         if keys[pygame.K_d]:
             player_x += player_speed
-        wall_rect = pygame.draw.rect(displaysurf, (255, 0, 255), pygame.Rect(64, 64, tile_size, tile_size))
         tiles(map1)
-        
-        if player_rect.colliderect(wall_rect):
-            if abs(player_rect.top - wall_rect.bottom) < collision_tolerance:
-                player_y += 7
-            if abs(player_rect.bottom - wall_rect.top) < collision_tolerance:
-                player_y -= 7
-            if abs(player_rect.right - wall_rect.left) < collision_tolerance:
-                player_x -= 7
-            if abs(player_rect.left - wall_rect.right) < collision_tolerance:
-                player_x += 7
+        for tile_rect in tile_rect_list:
+            if player_rect.colliderect(tile_rect):
+                if abs(player_rect.top - tile_rect.bottom) < collision_tolerance:
+                    player_y += 7
+                if abs(player_rect.bottom - tile_rect.top) < collision_tolerance:
+                    player_y -= 7
+                if abs(player_rect.right - tile_rect.left) < collision_tolerance:
+                    player_x -= 7
+                if abs(player_rect.left - tile_rect.right) < collision_tolerance:
+                    player_x += 7
         player_rect = pygame.draw.rect(displaysurf, player_color, pygame.Rect(player_x, player_y, tile_size, tile_size))
         update_display()
         clock.tick(60)
