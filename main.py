@@ -1,5 +1,5 @@
 import pygame, sys
-
+pygame.init()
 #display screen
 resolution = displaysurf_width, displaysurf_height = (1920, 1080)
 displaysurf = pygame.display.set_mode(resolution)
@@ -18,9 +18,17 @@ white = (255, 255, 255)
 red = (255, 0, 0)
 green = (0, 255, 0)
 blue = (0, 0, 255)
+#fonts and text and location of text
+font = pygame.font.Font('freesansbold.ttf', 32)
 
+collision_detection_text = font.render("colliding", True, green, blue)
+
+fps = str(int(clock.get_fps()))
+fps_text = font.render(fps, True, green, blue)
+fps_text_loc = (5, 5)
 
 #collision
+collide_teleport_time = 0
 collision_tolerance = 10
 #tiles and map
 tile_size = 64
@@ -77,10 +85,16 @@ def quit():
     pygame.quit()
     sys.exit()
 
+def update_fps():
+    fps = str(int(clock.get_fps()))
+    fps_text = font.render(fps, True, green, blue)
+    return fps_text
+
 def update_display():
     pygame.display.update()
 
 def game_loop():
+    global collide_teleport_time, collision_detection_text
     #player
     player_color = blue
     player_speed = 6
@@ -89,6 +103,7 @@ def game_loop():
     player_rect = pygame.draw.rect(displaysurf, player_color, pygame.Rect(player_x, player_y, tile_size, tile_size))
     while game_state == 'tag':
         displaysurf.fill(black)
+        update_fps()
         tiles(map1)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -96,6 +111,7 @@ def game_loop():
         keys = pygame.key.get_pressed()
         collision_index = player_rect.collidelist(tile_rect_list)
         if collision_index == -1:
+            collision_detection_text = font.render("No Collision", True, green, blue)
             player_color = blue
             if keys[pygame.K_w]:
                 player_y -= player_speed
@@ -106,7 +122,9 @@ def game_loop():
             if keys[pygame.K_d]:
                 player_x += player_speed
         else:
+            collision_detection_text = font.render("No Colliding", True, green, blue)
             player_color = green
+            collide_teleport_time =+0.01
             if abs(player_rect.top - tile_rect_list[collision_index].bottom) < collision_tolerance:
                 player_y += collision_tolerance + 7
             if abs(player_rect.bottom - tile_rect_list[collision_index].top) < collision_tolerance:
@@ -115,13 +133,23 @@ def game_loop():
                 player_x -= collision_tolerance + 7
             if abs(player_rect.left - tile_rect_list[collision_index].right) < collision_tolerance:
                 player_x += collision_tolerance + 7
+        if collide_teleport_time == 5:
+            player_y =+ 5
+            collide_teleport_time = 0
+            if player_rect.colliderect(tile_rect_list[collision_index]):
+                player_x =+ 5
+                collide_teleport_time = 0
+                if player_rect.colliderect(tile_rect_list[collision_index]):
+                    player_y =- 15
+                    collide_teleport_time = 0
+                    if player_rect.colliderect(tile_rect_list[collision_index]):
+                        player_x =- 15
+                        collide_teleport_time = 0
         player_rect = pygame.draw.rect(displaysurf, player_color, pygame.Rect(player_x, player_y, tile_size, tile_size))
+        displaysurf.blit(collision_detection_text, (fps_text_loc[0], fps_text_loc[1]+30))
+        displaysurf.blit(fps_text, fps_text_loc)
         update_display()
         clock.tick(60)
-
-
-
-
 
 if __name__ == '__main__':
     game_loop()
