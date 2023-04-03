@@ -81,6 +81,49 @@ def tiles(map1):
             if c == "e":
                 enemy_rect = displaysurf.blit(enemy_png, (x * tile_size, y * tile_size))
                 enemy_rect_list.append(enemy_rect)
+
+def player_movement(player_x,player_y,player_speed):
+    keys = pygame.key.get_pressed()
+    # collision_detection_text = font.render("No Collision", True, green, blue)
+    # player_color = blue
+    if keys[pygame.K_w]:
+        player_y -= player_speed
+    if keys[pygame.K_s]:
+        player_y += player_speed
+    if keys[pygame.K_a]:
+        player_x -= player_speed
+    if keys[pygame.K_d]:
+        player_x += player_speed
+    return player_x, player_y
+
+def collision_teleport_time(collision_index, player_rect, player_x, player_y, collide_teleport_time):
+    player_y =+ 5
+    collide_teleport_time = 0
+    if player_rect.colliderect(tile_rect_list[collision_index]):
+        player_x =+ 5
+        collide_teleport_time = 0
+        if player_rect.colliderect(tile_rect_list[collision_index]):
+            player_y =- 15
+            collide_teleport_time = 0
+            if player_rect.colliderect(tile_rect_list[collision_index]):
+                player_x =- 15
+                collide_teleport_time = 0
+
+
+def player_collision(player_rect,player_x,player_y, collision_index):
+    # collision_detection_text = font.render("No Collision", True, green, blue)
+    # player_color = green
+    # collide_teleport_time =+ 0.01
+    if abs(player_rect.top - tile_rect_list[collision_index].bottom) < collision_tolerance:
+        player_y += collision_tolerance + 7
+    if abs(player_rect.bottom - tile_rect_list[collision_index].top) < collision_tolerance:
+        player_y -= collision_tolerance + 7
+    if abs(player_rect.right - tile_rect_list[collision_index].left) < collision_tolerance:
+        player_x -= collision_tolerance + 7
+    if abs(player_rect.left - tile_rect_list[collision_index].right) < collision_tolerance:
+        player_x += collision_tolerance + 7    
+    return player_x, player_y
+
 def quit():
     pygame.quit()
     sys.exit()
@@ -108,43 +151,14 @@ def game_loop():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit()
-        keys = pygame.key.get_pressed()
-        collision_index = player_rect.collidelist(tile_rect_list)
-        if collision_index == -1:
-            collision_detection_text = font.render("No Collision", True, green, blue)
-            player_color = blue
-            if keys[pygame.K_w]:
-                player_y -= player_speed
-            if keys[pygame.K_s]:
-                player_y += player_speed
-            if keys[pygame.K_a]:
-                player_x -= player_speed
-            if keys[pygame.K_d]:
-                player_x += player_speed
-        else:
-            collision_detection_text = font.render("No Colliding", True, green, blue)
-            player_color = green
-            collide_teleport_time =+0.01
-            if abs(player_rect.top - tile_rect_list[collision_index].bottom) < collision_tolerance:
-                player_y += collision_tolerance + 7
-            if abs(player_rect.bottom - tile_rect_list[collision_index].top) < collision_tolerance:
-                player_y -= collision_tolerance + 7
-            if abs(player_rect.right - tile_rect_list[collision_index].left) < collision_tolerance:
-                player_x -= collision_tolerance + 7
-            if abs(player_rect.left - tile_rect_list[collision_index].right) < collision_tolerance:
-                player_x += collision_tolerance + 7
-        if collide_teleport_time == 5:
-            player_y =+ 5
-            collide_teleport_time = 0
-            if player_rect.colliderect(tile_rect_list[collision_index]):
-                player_x =+ 5
-                collide_teleport_time = 0
-                if player_rect.colliderect(tile_rect_list[collision_index]):
-                    player_y =- 15
-                    collide_teleport_time = 0
-                    if player_rect.colliderect(tile_rect_list[collision_index]):
-                        player_x =- 15
-                        collide_teleport_time = 0
+        player_x, player_y = player_movement(player_x,player_y,player_speed)
+        collision_indexes = player_rect.collidelistall(tile_rect_list)
+        while len(collision_indexes) > 0:
+            collision_index = collision_indexes[0]
+            player_x, player_y = player_collision(player_rect,player_x,player_y, collision_index)
+            collision_indexes = player_rect.collidelistall(tile_rect_list)
+        # if collide_teleport_time == 5:
+        #     collision_teleport_time(collision_indexes, player_rect, player_x, player_y, collide_teleport_time)
         player_rect = pygame.draw.rect(displaysurf, player_color, pygame.Rect(player_x, player_y, tile_size, tile_size))
         displaysurf.blit(collision_detection_text, (fps_text_loc[0], fps_text_loc[1]+30))
         displaysurf.blit(fps_text, fps_text_loc)
