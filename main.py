@@ -110,7 +110,7 @@ def collision_teleport_time(collision_index, player_rect, player_x, player_y, co
                 collide_teleport_time = 0
 
 
-def player_collision(player_rect,player_x,player_y, collision_index):
+def player_collision(player_rect,player_x,player_y, collision_tolerance,tile_rect_list, collision_index):
     # collision_detection_text = font.render("No Collision", True, green, blue)
     # player_color = green
     # collide_teleport_time =+ 0.01
@@ -121,7 +121,7 @@ def player_collision(player_rect,player_x,player_y, collision_index):
     if abs(player_rect.right - tile_rect_list[collision_index].left) < collision_tolerance:
         player_x -= collision_tolerance + 7
     if abs(player_rect.left - tile_rect_list[collision_index].right) < collision_tolerance:
-        player_x += collision_tolerance + 7    
+        player_x += collision_tolerance + 7
     return player_x, player_y
 
 def quit():
@@ -155,7 +155,15 @@ def game_loop():
         collision_indexes = player_rect.collidelistall(tile_rect_list)
         while len(collision_indexes) > 0:
             collision_index = collision_indexes[0]
-            player_x, player_y = player_collision(player_rect,player_x,player_y, collision_index)
+            # player_x, player_y = player_collision(player_rect,player_x,player_y, collision_tolerance,tile_rect_list, collision_index)
+            if abs(player_rect.top - tile_rect_list[collision_index].bottom) < collision_tolerance:
+                player_y += collision_tolerance + 7
+            if abs(player_rect.bottom - tile_rect_list[collision_index].top) < collision_tolerance:
+                player_y -= collision_tolerance + 7
+            if abs(player_rect.right - tile_rect_list[collision_index].left) < collision_tolerance:
+                player_x -= collision_tolerance + 7
+            if abs(player_rect.left - tile_rect_list[collision_index].right) < collision_tolerance:
+                player_x += collision_tolerance + 7
             collision_indexes = player_rect.collidelistall(tile_rect_list)
         # if collide_teleport_time == 5:
         #     collision_teleport_time(collision_indexes, player_rect, player_x, player_y, collide_teleport_time)
